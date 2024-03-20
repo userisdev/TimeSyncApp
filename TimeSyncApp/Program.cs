@@ -61,17 +61,23 @@ namespace TimeSyncApp
                 while (true)
                 {
                     TimeInfo timeInfo = GetNetworkTime(hostname);
+                    Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Running.");
+
                     double diff = Math.Abs((timeInfo.Local - timeInfo.NTP).TotalSeconds);
                     if (diff > 1)
                     {
-                        Console.WriteLine($"{timeInfo.Local:yyyy/MM/dd HH:mm:ss.fff} Bad Time. [{diff}]");
+                        Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Bad Time. [{diff}]");
                         Run("sc", "start w32time task_started");
                         Run("w32tm", "/resync");
                         TimeInfo fixedTime = GetNetworkTime(hostname);
-                        Console.WriteLine($"{timeInfo.Local:yyyy/MM/dd HH:mm:ss.fff} Fixed Timee. [{Math.Abs((fixedTime.Local - fixedTime.NTP).TotalSeconds)}]");
+                        Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Fixed Timee. [{Math.Abs((fixedTime.Local - fixedTime.NTP).TotalSeconds)}]");
                     }
 
-                    Thread.Sleep(100);
+                    var tmp = DateTime.Now.AddHours(1);
+                    var ajust = new DateTime(tmp.Year, tmp.Month, tmp.Day, tmp.Hour, 0, 0);
+                    var span = ajust - DateTime.Now;
+                    Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Sleep. [{span}]");
+                    Thread.Sleep(span);
                 }
             });
 
