@@ -12,7 +12,7 @@ namespace TimeSyncApp
         /// <returns> </returns>
         private static TimeInfo GetNetworkTime(string hostname)
         {
-            DateTime localTimeBeforeRequest = DateTime.Now;
+            DateTime localTimeBeforeRequest = DateTime.UtcNow;
 
             // NTPのタイムスタンプは1900年1月1日からの秒数です
             DateTime baseTime = new(1900, 1, 1);
@@ -29,7 +29,7 @@ namespace TimeSyncApp
             IPEndPoint ipendpoint = new(IPAddress.Any, 0);
             byte[] receivedData = udpClient.Receive(ref ipendpoint);
 
-            DateTime localTimeAfterResponse = DateTime.Now;
+            DateTime localTimeAfterResponse = DateTime.UtcNow;
 
             // 32ビットの秒数としてNTP応答から取得
             ulong intPart = ((ulong)receivedData[40] << 24) | ((ulong)receivedData[41] << 16) | ((ulong)receivedData[42] << 8) | receivedData[43];
@@ -46,7 +46,7 @@ namespace TimeSyncApp
             // 補正を行い、遅延を考慮してNTPサーバーから取得した時刻に補正を加える
             networkDateTime += oneWayDelay;
 
-            return new TimeInfo(localTimeBeforeRequest, networkDateTime.AddHours(9));
+            return new TimeInfo(localTimeBeforeRequest, networkDateTime);
         }
 
         /// <summary> Defines the entry point of the application. </summary>
@@ -73,9 +73,9 @@ namespace TimeSyncApp
                         Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Fixed Timee. [{Math.Abs((fixedTime.Local - fixedTime.NTP).TotalSeconds)}]");
                     }
 
-                    var tmp = DateTime.Now.AddHours(1);
-                    var ajust = new DateTime(tmp.Year, tmp.Month, tmp.Day, tmp.Hour, 0, 0);
-                    var span = ajust - DateTime.Now;
+                    DateTime tmp = DateTime.UtcNow.AddHours(1);
+                    DateTime ajust = new(tmp.Year, tmp.Month, tmp.Day, tmp.Hour, 0, 0);
+                    TimeSpan span = ajust - DateTime.UtcNow;
                     Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Sleep. [{span}]");
                     Thread.Sleep(span);
                 }
