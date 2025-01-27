@@ -14,16 +14,16 @@ namespace TimeSyncApp
         {
             DateTime localTimeBeforeRequest = DateTime.UtcNow;
 
-            // NTPのタイムスタンプは1900年1月1日からの秒数です
+            // NOTE:NTPのタイムスタンプは1900年1月1日からの秒数です
             DateTime baseTime = new(1900, 1, 1);
 
-            // NTPパケットの送信バイト配列を作成します
+            // NOTE:NTPパケットの送信バイト配列を作成します
             byte[] ntpData = new byte[48];
 
-            // NTPリクエストを示すバイト
+            // NOTE:NTPリクエストを示すバイト
             ntpData[0] = 0x1B;
 
-            // NTPサーバーにUDPソケットを作成し、リクエストを送信します
+            // NOTE:NTPサーバーにUDPソケットを作成し、リクエストを送信します
             using UdpClient udpClient = new(hostname, 123);
             _ = udpClient.Send(ntpData, ntpData.Length);
             IPEndPoint ipendpoint = new(IPAddress.Any, 0);
@@ -31,21 +31,20 @@ namespace TimeSyncApp
 
             DateTime localTimeAfterResponse = DateTime.UtcNow;
 
-            // 32ビットの秒数としてNTP応答から取得
+            // NOTE:32ビットの秒数としてNTP応答から取得
             ulong intPart = ((ulong)receivedData[40] << 24) | ((ulong)receivedData[41] << 16) | ((ulong)receivedData[42] << 8) | receivedData[43];
             ulong fracPart = ((ulong)receivedData[44] << 24) | ((ulong)receivedData[45] << 16) | ((ulong)receivedData[46] << 8) | receivedData[47];
 
-            // 受信時刻と送信時刻の間の時間差を計算し、遅延として考慮する
+            // NOTE:受信時刻と送信時刻の間の時間差を計算し、遅延として考慮する
             TimeSpan roundTripTime = localTimeAfterResponse - localTimeBeforeRequest;
             TimeSpan oneWayDelay = roundTripTime / 2;
 
-            // 取得した秒数からDateTimeオブジェクトを作成
+            // NOTE:取得した秒数からDateTimeオブジェクトを作成
             ulong milliseconds = (intPart * 1000) + (fracPart * 1000 / 0x100000000L);
             DateTime networkDateTime = baseTime.AddMilliseconds((long)milliseconds);
 
-            // 補正を行い、遅延を考慮してNTPサーバーから取得した時刻に補正を加える
+            // NOTE:補正を行い、遅延を考慮してNTPサーバーから取得した時刻に補正を加える
             networkDateTime += oneWayDelay;
-
             return new TimeInfo(localTimeBeforeRequest, networkDateTime);
         }
 
