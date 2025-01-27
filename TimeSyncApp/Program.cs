@@ -54,35 +54,27 @@ namespace TimeSyncApp
         {
             string hostname = "time.windows.com";
 
-            Console.WriteLine("press any key to exit . . .");
-
-            _ = Task.Run(() =>
+            while (true)
             {
-                while (true)
+                TimeInfo timeInfo = GetNetworkTime(hostname);
+                Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Running.");
+
+                double diff = Math.Abs((timeInfo.Local - timeInfo.NTP).TotalSeconds);
+                if (diff > 1)
                 {
-                    TimeInfo timeInfo = GetNetworkTime(hostname);
-                    Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Running.");
-
-                    double diff = Math.Abs((timeInfo.Local - timeInfo.NTP).TotalSeconds);
-                    if (diff > 1)
-                    {
-                        Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Bad Time. [{diff}]");
-                        Run("sc", "start w32time task_started");
-                        Run("w32tm", "/resync");
-                        TimeInfo fixedTime = GetNetworkTime(hostname);
-                        Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Fixed Timee. [{Math.Abs((fixedTime.Local - fixedTime.NTP).TotalSeconds)}]");
-                    }
-
-                    DateTime tmp = DateTime.UtcNow.AddHours(1);
-                    DateTime ajust = new(tmp.Year, tmp.Month, tmp.Day, tmp.Hour, 0, 0);
-                    TimeSpan span = ajust - DateTime.UtcNow;
-                    Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Sleep. [{span}]");
-                    Thread.Sleep(span);
+                    Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Bad Time. [{diff}]");
+                    Run("sc", "start w32time task_started");
+                    Run("w32tm", "/resync");
+                    TimeInfo fixedTime = GetNetworkTime(hostname);
+                    Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Fixed Timee. [{Math.Abs((fixedTime.Local - fixedTime.NTP).TotalSeconds)}]");
                 }
-            });
 
-            _ = Console.ReadKey(true);
-            Environment.Exit(0);
+                DateTime tmp = DateTime.UtcNow.AddHours(1);
+                DateTime ajust = new(tmp.Year, tmp.Month, tmp.Day, tmp.Hour, 0, 0);
+                TimeSpan span = ajust - DateTime.UtcNow;
+                Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Sleep. [{span}]");
+                Thread.Sleep(span);
+            }
         }
 
         /// <summary> Runs the specified filename. </summary>
