@@ -65,7 +65,7 @@ namespace TimeSyncApp
                     Run("sc", "start w32time task_started");
                     Run("w32tm", "/resync");
                     TimeInfo fixedTime = GetNetworkTime(hostname);
-                    Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Fixed Timee. [{Math.Abs((fixedTime.Local - fixedTime.NTP).TotalSeconds)}]");
+                    Console.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} Fixed Time. [{Math.Abs((fixedTime.Local - fixedTime.NTP).TotalSeconds)}]");
                 }
 
                 DateTime tmp = DateTime.UtcNow.AddHours(1);
